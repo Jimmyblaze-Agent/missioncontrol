@@ -12,7 +12,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@react-three/drei": "^9.0.0",
     "@react-three/fiber": "^8.0.0",
-    "@react-three/rapier": "^2.2.0",
+    "@react-three/rapier": "^1.0.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/better-sqlite3": "^7.6.13",
     "better-sqlite3": "^12.6.2",
