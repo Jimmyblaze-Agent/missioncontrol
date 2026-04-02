@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { otpStore } from "@/lib/otpStore";
+import { jwtVerify } from "jose";
 
 const ALLOWED_EMAIL = process.env.ALLOWED_EMAIL || "jkgbusiness@gmail.com";
 
-// Rate limiting
+// Rate limiting (per-IP)
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 15 * 60 * 1000;
 const LOCKOUT_MS = 15 * 60 * 1000;
 interface AttemptRecord { count: number; windowStart: number; lockedUntil?: number; }
 const attempts = new Map<string, AttemptRecord>();
+
+function getOtpSecret(): Uint8Array {
+  const secret = process.env.SESSION_SECRET || "fallback-otp-secret-change-me";
+  return new TextEncoder().encode(secret);
+}
 
 function getClientIp(request: NextRequest): string {
   return (
@@ -23,9 +28,8 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfterMs?: number }
   const now = Date.now();
   const record = attempts.get(ip);
   if (!record) return { allowed: true };
-  if (record.lockedUntil && now < record.lockedUntil) {
+  if (record.lockedUntil && now < record.lockedUntil)
     return { allowed: false, retryAfterMs: record.lockedUntil - now };
-  }
   if (now - record.windowStart > WINDOW_MS) { attempts.delete(ip); return { allowed: true }; }
   if (record.count >= MAX_ATTEMPTS) {
     record.lockedUntil = now + LOCKOUT_MS;
@@ -59,23 +63,27 @@ export async function POST(request: NextRequest) {
 
   const { email, code } = await request.json();
 
-  if (!email || email.toLowerCase().trim() !== ALLOWED_EMAIL.toLowerCase()) {
+  if (!email || email.toLowerCase().trim() !== ALLOWED_EMAIL.toLowerCase().trim()) {
     recordFailure(ip);
     return NextResponse.json({ success: false, error: "Not authorized." }, { status: 403 });
   }
 
-  const stored = otpStore.get(ALLOWED_EMAIL.toLowerCase());
-
-  if (!stored) {
+  // Read OTP token from cookie
+  const otpToken = request.cookies.get("mc_otp")?.value;
+  if (!otpToken) {
     recordFailure(ip);
     return NextResponse.json(
-      { success: false, error: "No code found. Please request a new one." },
+      { success: false, error: "No active code. Please request a new one." },
       { status: 401 }
     );
   }
 
-  if (Date.now() > stored.expiresAt) {
-    otpStore.delete(ALLOWED_EMAIL.toLowerCase());
+  // Verify JWT and extract stored code
+  let payload: { code: string; email: string };
+  try {
+    const { payload: p } = await jwtVerify(otpToken, getOtpSecret());
+    payload = p as { code: string; email: string };
+  } catch {
     recordFailure(ip);
     return NextResponse.json(
       { success: false, error: "Code expired. Please request a new one." },
@@ -83,17 +91,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (code !== stored.code) {
+  if (code !== payload.code) {
     recordFailure(ip);
     return NextResponse.json({ success: false, error: "Incorrect code." }, { status: 401 });
   }
 
-  // Success — clear OTP and set session cookie
-  otpStore.delete(ALLOWED_EMAIL.toLowerCase());
+  // Success — clear OTP cookie, set session cookie
   attempts.delete(ip);
-
-  const sessionSecret = process.env.SESSION_SECRET || process.env.AUTH_SECRET || "fallback-secret";
+  const sessionSecret = process.env.SESSION_SECRET || "fallback-secret";
   const response = NextResponse.json({ success: true });
+
+  response.cookies.set("mc_otp", "", { maxAge: 0, path: "/" });
   response.cookies.set("mc_auth", sessionSecret, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
