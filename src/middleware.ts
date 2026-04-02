@@ -9,7 +9,8 @@ const PUBLIC_API_PREFIXES = ["/api/auth/", "/api/health"];
 
 function isAuthenticated(request: NextRequest): boolean {
   const authCookie = request.cookies.get("mc_auth");
-  return !!(authCookie && authCookie.value === process.env.AUTH_SECRET);
+  const secret = process.env.SESSION_SECRET || process.env.AUTH_SECRET || "fallback-secret";
+  return !!(authCookie && authCookie.value === secret);
 }
 
 export function middleware(request: NextRequest) {
