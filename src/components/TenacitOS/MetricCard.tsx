@@ -1,6 +1,6 @@
 /**
  * MetricCard Component
- * Based on Component/MetricCard from tenacios-design.json
+ * Based on Component/MetricCard from greenox-design.json
  */
 
 import { LucideIcon } from "lucide-react";

@@ -1,6 +1,6 @@
 /**
  * AgentRow Component
- * Based on Component/AgentRow from tenacios-design.json
+ * Based on Component/AgentRow from greenox-design.json
  */
 
 interface AgentRowProps {

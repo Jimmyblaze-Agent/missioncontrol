@@ -1,6 +1,6 @@
 /**
  * CronRow Component
- * Based on Component/CronRow from tenacios-design.json
+ * Based on Component/CronRow from greenox-design.json
  */
 
 import { Clock } from "lucide-react";

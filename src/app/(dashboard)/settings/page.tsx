@@ -36,6 +36,47 @@ interface SystemData {
   timestamp: string;
 }
 
+function GatewayRestartButton() {
+  const [gwLoading, setGwLoading] = useState(false);
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const handleRestart = async () => {
+    setGwLoading(true);
+    setToast(null);
+    try {
+      const res = await fetch("/api/system/gateway/restart", { method: "POST" });
+      const data = await res.json();
+      setToast({ type: data.success ? "success" : "error", message: data.message });
+    } catch {
+      setToast({ type: "error", message: "Failed to reach gateway restart API" });
+    } finally {
+      setGwLoading(false);
+      setTimeout(() => setToast(null), 5000);
+    }
+  };
+
+  return (
+    <div className="mt-4">
+      <button
+        onClick={handleRestart}
+        disabled={gwLoading}
+        className="px-4 py-2 rounded-lg font-medium text-white disabled:opacity-50 transition-colors"
+        style={{ backgroundColor: "#2E7D32" }}
+      >
+        {gwLoading ? "Restarting..." : "Restart Gateway"}
+      </button>
+      {toast && (
+        <div className="mt-2 px-4 py-2 rounded-lg text-sm" style={{
+          backgroundColor: toast.type === "success" ? "#2E7D32" : "#dc2626",
+          color: "white"
+        }}>
+          {toast.message}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const [systemData, setSystemData] = useState<SystemData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -120,6 +161,26 @@ export default function SettingsPage() {
         <div>
           <QuickActions onActionComplete={handleRefresh} />
         </div>
+      </div>
+
+      {/* Gateway Control */}
+      <div
+        className="mt-6 md:mt-8 p-4 md:p-6 rounded-xl"
+        style={{
+          backgroundColor: "var(--card)",
+          border: "1px solid var(--border)"
+        }}
+      >
+        <h2
+          className="text-lg md:text-xl font-bold mb-2"
+          style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}
+        >
+          Gateway Control
+        </h2>
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          Restart the OpenClaw gateway service when needed.
+        </p>
+        <GatewayRestartButton />
       </div>
 
       {/* Footer Info */}

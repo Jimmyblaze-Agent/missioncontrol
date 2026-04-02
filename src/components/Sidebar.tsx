@@ -3,29 +3,21 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Activity, Timer, Brain, Search, BarChart3, FileBarChart, Puzzle, FolderOpen, Terminal, LogOut, Settings, User, Menu, X, Users, Gamepad2, GitBranch, Workflow, Zap, Server, GitFork, TerminalSquare, History, } from "lucide-react";
-import { getAgentDisplayName } from "@/config/branding";
+import { LayoutDashboard, Activity, Timer, Brain, FolderOpen, LogOut, Settings, Menu, X, Users, BookOpen, FolderKanban, LogIn } from "lucide-react";
+// GreenOx Digital brand color
+const BRAND_COLOR = "#2E7D32";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/tasks", label: "Tasks", icon: FolderKanban },
   { href: "/agents", label: "Agents", icon: Users },
-  { href: "/office", label: "🎮 Office", icon: Gamepad2, highlight: true },
-  { href: "/actions", label: "Quick Actions", icon: Zap },
-  { href: "/system", label: "System", icon: Server },
-  { href: "/logs", label: "Live Logs", icon: Terminal },
-  { href: "/terminal", label: "Terminal", icon: TerminalSquare },
-  { href: "/git", label: "Git", icon: GitFork },
-  { href: "/workflows", label: "Workflows", icon: Workflow },
-  { href: "/activity", label: "Activity", icon: Activity },
+  { href: "/projects", label: "Projects", icon: LogIn },
+  { href: "/cron", label: "Cron", icon: Timer },
   { href: "/memory", label: "Memory", icon: Brain },
+  { href: "/knowledge", label: "JG Knowledge", icon: BookOpen },
   { href: "/files", label: "Files", icon: FolderOpen },
-  { href: "/cron", label: "Cron Jobs", icon: Timer },
-  { href: "/sessions", label: "Sessions", icon: History },
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/reports", label: "Reports", icon: FileBarChart },
-  { href: "/skills", label: "Skills", icon: Puzzle },
-  { href: "/about", label: getAgentDisplayName(), icon: User },
+  { href: "/activity", label: "Activity", icon: Activity },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -171,19 +163,16 @@ export function Sidebar() {
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-2 py-3 mb-4">
-          <Terminal
-            className="w-6 h-6"
-            style={{ color: "var(--accent)" }}
-          />
+          <span style={{ fontSize: "1.25rem" }}>🦾</span>
           <h1
             className="text-base font-bold tracking-tight"
             style={{
               fontFamily: "var(--font-heading)",
-              color: "var(--text-primary)",
+              color: BRAND_COLOR,
               letterSpacing: "-0.5px",
             }}
           >
-            Mission Control
+            GreenOx Digital
           </h1>
         </div>
 
@@ -203,16 +192,9 @@ export function Sidebar() {
                       !isActive
                         ? {
                             color: "var(--text-secondary)",
-                            ...(item.highlight
-                              ? {
-                                  background:
-                                    "linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(236, 72, 153, 0.1))",
-                                  borderLeft: "3px solid var(--accent)",
-                                }
-                              : {}),
                           }
                         : {
-                            backgroundColor: "var(--accent)",
+                            backgroundColor: "#2E7D32",
                             color: "var(--text-primary)",
                             fontFamily: "var(--font-heading)",
                             fontWeight: 600,
@@ -245,7 +227,7 @@ export function Sidebar() {
                     color: "var(--text-secondary)",
                   }
                 : {
-                    backgroundColor: "var(--accent)",
+                    backgroundColor: "#2E7D32",
                     color: "var(--text-primary)",
                     fontFamily: "var(--font-heading)",
                     fontWeight: 600,
@@ -263,7 +245,7 @@ export function Sidebar() {
             className="px-4 py-2 text-xs"
             style={{ color: "var(--text-muted)" }}
           >
-            OpenClaw Agent
+            GreenOx Digital
           </div>
 
           <button

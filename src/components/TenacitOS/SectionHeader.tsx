@@ -1,6 +1,6 @@
 /**
  * SectionHeader Component
- * Based on Component/SectionHeader from tenacios-design.json
+ * Based on Component/SectionHeader from greenox-design.json
  */
 
 interface SectionHeaderProps {

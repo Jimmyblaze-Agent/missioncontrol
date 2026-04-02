@@ -1,6 +1,6 @@
 /**
  * ActivityRow Component
- * Based on Component/ActivityRow from tenacios-design.json
+ * Based on Component/ActivityRow from greenox-design.json
  */
 
 interface ActivityRowProps {
