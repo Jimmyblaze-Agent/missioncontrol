@@ -18,7 +18,7 @@ export interface Notification {
 const typeConfig: Record<
   Notification["type"],
   {
-    icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
+    icon: React.ComponentType<{ size?: string | number; className?: string; style?: React.CSSProperties }>;
     colorVar: string;
     bgVar: string;
   }

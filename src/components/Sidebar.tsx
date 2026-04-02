@@ -3,32 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  LayoutDashboard,
-  Activity,
-  Timer,
-  Brain,
-  Search,
-  BarChart3,
-  FileBarChart,
-  Puzzle,
-  FolderOpen,
-  Terminal,
-  LogOut,
-  Settings,
-  User,
-  Menu,
-  X,
-  Users,
-  Gamepad2,
-  GitBranch,
-  Workflow,
-  Zap,
-  Server,
-  GitFork,
-  SquareTerminal,
-  History,
-} from "lucide-react";
+import { LayoutDashboard, Activity, Timer, Brain, Search, BarChart3, FileBarChart, Puzzle, FolderOpen, Terminal, LogOut, Settings, User, Menu, X, Users, Gamepad2, GitBranch, Workflow, Zap, Server, GitFork, TerminalSquare, History, } from "lucide-react";
 import { getAgentDisplayName } from "@/config/branding";
 
 const navItems = [
@@ -38,7 +13,7 @@ const navItems = [
   { href: "/actions", label: "Quick Actions", icon: Zap },
   { href: "/system", label: "System", icon: Server },
   { href: "/logs", label: "Live Logs", icon: Terminal },
-  { href: "/terminal", label: "Terminal", icon: SquareTerminal },
+  { href: "/terminal", label: "Terminal", icon: TerminalSquare },
   { href: "/git", label: "Git", icon: GitFork },
   { href: "/workflows", label: "Workflows", icon: Workflow },
   { href: "/activity", label: "Activity", icon: Activity },

@@ -2,16 +2,44 @@
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Terminal, Lock, AlertCircle } from "lucide-react";
+import { Terminal, Mail, KeyRound, AlertCircle } from "lucide-react";
 
 function LoginForm() {
-  const [password, setPassword] = useState("");
+  const [step, setStep] = useState<"email" | "code">("email");
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setStep("code");
+      } else {
+        setError(data.error || "Failed to send code. Check the email address.");
+      }
+    } catch {
+      setError("Connection error. Please try again.");
+    }
+
+    setLoading(false);
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -20,7 +48,7 @@ function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, code }),
       });
 
       const data = await res.json();
@@ -30,104 +58,157 @@ function LoginForm() {
         router.push(from);
         router.refresh();
       } else {
-        setError("Contraseña incorrecta");
+        setError(data.error || "Invalid or expired code.");
       }
     } catch {
-      setError("Error de conexión");
+      setError("Connection error. Please try again.");
     }
 
     setLoading(false);
   };
 
   return (
-    <div 
+    <div
       className="rounded-xl p-10"
       style={{
-        backgroundColor: 'var(--card)',
-        border: '1px solid var(--border)',
+        backgroundColor: "var(--card)",
+        border: "1px solid var(--border)",
       }}
     >
       {/* Header */}
-      <div className="text-center mb-6 flex flex-col items-center gap-2">
+      <div className="text-center mb-8 flex flex-col items-center gap-2">
         <div className="flex items-center gap-2.5">
-          <Terminal 
-            className="w-7 h-7" 
-            style={{ color: 'var(--accent)' }} 
-          />
-          <span className="text-2xl">🦞</span>
-          <h1 
+          <Terminal className="w-7 h-7" style={{ color: "var(--accent)" }} />
+          <h1
             className="text-xl font-bold"
-            style={{ 
-              fontFamily: 'var(--font-heading)',
-              color: 'var(--text-primary)',
-              letterSpacing: '-0.5px'
+            style={{
+              fontFamily: "var(--font-heading)",
+              color: "var(--text-primary)",
+              letterSpacing: "-0.5px",
             }}
           >
             Mission Control
           </h1>
         </div>
-        <p 
-          className="text-sm"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          Introduce la contraseña para acceder
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          {step === "email"
+            ? "Enter your email to receive a login code"
+            : `Code sent to ${email}`}
         </p>
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="relative">
-          <Lock 
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px]" 
-            style={{ color: 'var(--text-muted)' }}
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 rounded-lg text-sm"
-            style={{
-              backgroundColor: 'var(--card-elevated)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-            }}
-            placeholder="Contraseña"
-            required
-          />
-        </div>
-
-        {error && (
-          <div 
-            className="flex items-center gap-2 text-sm px-4 py-3 rounded-lg"
-            style={{
-              backgroundColor: 'var(--error-bg)',
-              color: 'var(--error)',
-            }}
-          >
-            <AlertCircle className="w-4 h-4" />
-            {error}
+      {/* Step 1 — Email */}
+      {step === "email" && (
+        <form onSubmit={handleSendCode} className="space-y-6">
+          <div className="relative">
+            <Mail
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px]"
+              style={{ color: "var(--text-muted)" }}
+            />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 rounded-lg text-sm"
+              style={{
+                backgroundColor: "var(--card-elevated)",
+                border: "1px solid var(--border)",
+                color: "var(--text-primary)",
+              }}
+              placeholder="your@email.com"
+              required
+              autoFocus
+            />
           </div>
-        )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50"
-          style={{
-            backgroundColor: 'var(--accent)',
-            color: 'white',
-          }}
-        >
-          {loading ? "Verificando..." : "Entrar"}
-        </button>
-      </form>
+          {error && (
+            <div
+              className="flex items-center gap-2 text-sm px-4 py-3 rounded-lg"
+              style={{
+                backgroundColor: "var(--error-bg)",
+                color: "var(--error)",
+              }}
+            >
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {error}
+            </div>
+          )}
 
-      {/* Footer */}
-      <p 
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50"
+            style={{ backgroundColor: "var(--accent)", color: "white" }}
+          >
+            {loading ? "Sending..." : "Send login code"}
+          </button>
+        </form>
+      )}
+
+      {/* Step 2 — Code */}
+      {step === "code" && (
+        <form onSubmit={handleVerifyCode} className="space-y-6">
+          <div className="relative">
+            <KeyRound
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px]"
+              style={{ color: "var(--text-muted)" }}
+            />
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              className="w-full pl-11 pr-4 py-3 rounded-lg text-sm tracking-widest"
+              style={{
+                backgroundColor: "var(--card-elevated)",
+                border: "1px solid var(--border)",
+                color: "var(--text-primary)",
+              }}
+              placeholder="6-digit code"
+              inputMode="numeric"
+              maxLength={6}
+              required
+              autoFocus
+            />
+          </div>
+
+          {error && (
+            <div
+              className="flex items-center gap-2 text-sm px-4 py-3 rounded-lg"
+              style={{
+                backgroundColor: "var(--error-bg)",
+                color: "var(--error)",
+              }}
+            >
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || code.length !== 6}
+            className="w-full font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50"
+            style={{ backgroundColor: "var(--accent)", color: "white" }}
+          >
+            {loading ? "Verifying..." : "Sign in"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setStep("email"); setError(""); setCode(""); }}
+            className="w-full text-sm py-2"
+            style={{ color: "var(--text-muted)" }}
+          >
+            ← Use a different email
+          </button>
+        </form>
+      )}
+
+      <p
         className="text-center text-xs mt-6"
-        style={{ color: 'var(--text-muted)' }}
+        style={{ color: "var(--text-muted)" }}
       >
-        Tenacitas Agent Dashboard
+        GreenOx Digital — Mission Control
       </p>
     </div>
   );
@@ -135,24 +216,26 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center p-4 -ml-64"
-      style={{ backgroundColor: 'var(--background)' }}
+      style={{ backgroundColor: "var(--background)" }}
     >
       <div className="w-full max-w-md">
-        <Suspense fallback={
-          <div 
-            className="rounded-xl p-10 animate-pulse"
-            style={{
-              backgroundColor: 'var(--card)',
-              border: '1px solid var(--border)',
-            }}
-          >
-            <div className="h-8 bg-gray-700 rounded mb-4" />
-            <div className="h-12 bg-gray-700 rounded mb-4" />
-            <div className="h-10 bg-gray-700 rounded" />
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div
+              className="rounded-xl p-10 animate-pulse"
+              style={{
+                backgroundColor: "var(--card)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <div className="h-8 bg-gray-700 rounded mb-4" />
+              <div className="h-12 bg-gray-700 rounded mb-4" />
+              <div className="h-10 bg-gray-700 rounded" />
+            </div>
+          }
+        >
           <LoginForm />
         </Suspense>
       </div>

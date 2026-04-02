@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * Real-time activity stream via SSE
  * GET /api/activities/stream
