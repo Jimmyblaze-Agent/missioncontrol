@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const res = await fetch("https://api.agentmail.to/v0/inboxes/jimmy@agentmail.to/messages", {
+    const res = await fetch("https://api.agentmail.to/v0/inboxes/jimmyblaze@agentmail.to/messages/send", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
