@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Bell, User, Command } from "lucide-react";
+import { Search, Bell, User, Command, RefreshCw } from "lucide-react";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationDropdown } from "@/components/NotificationDropdown";
+import pkg from "../../../package.json";
 
 export function TopBar() {
   const [showSearch, setShowSearch] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -25,6 +27,12 @@ export function TopBar() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [showSearch]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    window.dispatchEvent(new CustomEvent("dashboard-refresh"));
+    setTimeout(() => setRefreshing(false), 1000);
+  };
 
   return (
     <>
@@ -45,7 +53,7 @@ export function TopBar() {
           zIndex: 45,
         }}
       >
-        {/* Left: Logo & Title */}
+        {/* Left: Greeting & Version & Refresh */}
         <div className="flex items-center gap-3">
           <span style={{ fontSize: "20px" }}>🦞</span>
           <h1
@@ -57,7 +65,7 @@ export function TopBar() {
               letterSpacing: "-0.5px",
             }}
           >
-            TenacitOS
+            Hello Jeremy, CEO.
           </h1>
           {/* Version Badge */}
           <div
@@ -76,9 +84,35 @@ export function TopBar() {
                 letterSpacing: "1px",
               }}
             >
-              v1.0
+              v{pkg.version}
             </span>
           </div>
+          {/* Refresh Button */}
+          <button
+            onClick={handleRefresh}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "28px",
+              height: "28px",
+              borderRadius: "6px",
+              backgroundColor: "#2E7D32",
+              border: "none",
+              cursor: "pointer",
+              transition: "opacity 0.2s",
+            }}
+            title="Refresh Dashboard"
+          >
+            <RefreshCw
+              style={{
+                width: "14px",
+                height: "14px",
+                color: "#ffffff",
+                animation: refreshing ? "spin 1s linear infinite" : "none",
+              }}
+            />
+          </button>
         </div>
 
         {/* Right: Search + Notifications + User */}
@@ -139,7 +173,7 @@ export function TopBar() {
                   color: "var(--text-primary)",
                 }}
               >
-                C
+                J
               </span>
             </div>
             {/* Name */}
@@ -151,7 +185,7 @@ export function TopBar() {
                 color: "var(--text-secondary)",
               }}
             >
-              Carlos
+              Jeremy
             </span>
           </div>
         </div>
@@ -177,6 +211,13 @@ export function TopBar() {
           </div>
         </div>
       )}
+
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </>
   );
 }
