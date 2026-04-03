@@ -218,29 +218,6 @@ export function Sidebar() {
           className="pt-4 mt-4"
           style={{ borderTop: "1px solid var(--border)" }}
         >
-          <Link
-            href="/settings"
-            className={`nav-item w-full mb-2 ${pathname === "/settings" ? "active" : ""}`}
-            style={
-              pathname !== "/settings"
-                ? {
-                    color: "var(--text-secondary)",
-                  }
-                : {
-                    backgroundColor: "#2E7D32",
-                    color: "var(--text-primary)",
-                    fontFamily: "var(--font-heading)",
-                    fontWeight: 600,
-                  }
-            }
-          >
-            <Settings
-              className="w-5 h-5"
-              style={pathname !== "/settings" ? { color: "var(--text-muted)" } : undefined}
-            />
-            Settings
-          </Link>
-
           <div
             className="px-4 py-2 text-xs"
             style={{ color: "var(--text-muted)" }}
@@ -262,7 +239,7 @@ export function Sidebar() {
             }}
           >
             <LogOut className="w-4 h-4" />
-            <span className="text-sm">Cerrar sesión</span>
+            <span className="text-sm">Sign out</span>
           </button>
         </div>
       </aside>
